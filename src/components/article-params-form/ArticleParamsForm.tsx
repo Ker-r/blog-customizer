@@ -6,7 +6,7 @@ import { Text } from 'src/ui/text';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
-import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+import { useCloseOnOutsideClickOrEsc } from './hooks/useCloseOnOutsideClickOrEsc';
 import {
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -35,11 +35,10 @@ export const ArticleParamsForm = ({
 		useState<ArticleStateType>(currentArticleState);
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
-	// Закрытие сайдбара при клике вне
-	useOutsideClickClose({
-		isOpen: isSidebarOpen,
-		rootRef: sidebarRef,
-		onChange: setIsSidebarOpen,
+	useCloseOnOutsideClickOrEsc({
+		isOpenElement: isSidebarOpen,
+		elementRef: sidebarRef,
+		onClose: () => setIsSidebarOpen(false),
 	});
 
 	// Обработчик отправки формы (кнопка «Применить»)

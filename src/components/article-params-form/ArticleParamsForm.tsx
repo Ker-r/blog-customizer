@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { useState, useRef } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
@@ -14,6 +15,7 @@ import {
 	contentWidthArr,
 	defaultArticleState,
 	ArticleStateType,
+	OptionType,
 } from 'src/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
@@ -28,16 +30,16 @@ export const ArticleParamsForm = ({
 	onApply,
 }: ArticleParamsFormProps) => {
 	// Открыт ли сайдбар
-	const [isOpen, setIsOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [formState, setFormState] =
 		useState<ArticleStateType>(currentArticleState);
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
 	// Закрытие сайдбара при клике вне
 	useOutsideClickClose({
-		isOpen,
+		isOpen: isSidebarOpen,
 		rootRef: sidebarRef,
-		onChange: setIsOpen,
+		onChange: setIsSidebarOpen,
 	});
 
 	// Обработчик отправки формы (кнопка «Применить»)
@@ -52,79 +54,70 @@ export const ArticleParamsForm = ({
 		onApply(defaultArticleState); // Применяем дефолтные настройки к статье
 	};
 
+	// Обработчик изменения полей формы
+	const handleChange = (field: keyof ArticleStateType) => (option: OptionType) => {
+		setFormState((prev) => ({ ...prev, [field]: option }));
+	};
+
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
-			{isOpen && (
-				<aside
-					className={`${styles.container} ${isOpen ? styles.container_open : ''}`}
-					ref={sidebarRef}>
-					<form
-						className={styles.form}
-						onSubmit={handleSubmit}
-						onReset={handleReset}>
-						<Text size={31} weight={800} uppercase align='center'>
-							Задайте параметры
-						</Text>
+			<ArrowButton isOpen={isSidebarOpen} onClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+			<aside className={clsx(styles.container, { [styles.container_open]: isSidebarOpen })} ref={sidebarRef}>
+				<form
+					className={styles.form}
+					onSubmit={handleSubmit}
+					onReset={handleReset}>
+					<Text size={31} weight={800} uppercase align='center'>
+						Задайте параметры
+					</Text>
 
-						{/* Шрифт */}
-						<Select
-							title='Шрифт'
-							selected={formState.fontFamilyOption}
-							options={fontFamilyOptions}
-							onChange={(option) =>
-								setFormState({ ...formState, fontFamilyOption: option })
-							}
-						/>
+					{/* Шрифт */}
+					<Select
+						title='Шрифт'
+						selected={formState.fontFamilyOption}
+						options={fontFamilyOptions}
+						onChange={handleChange('fontFamilyOption')}
+					/>
 
-						{/* Размер шрифта */}
-						<RadioGroup
-							title='Размер шрифта'
-							name='fontSize'
-							selected={formState.fontSizeOption}
-							options={fontSizeOptions}
-							onChange={(option) =>
-								setFormState({ ...formState, fontSizeOption: option })
-							}
-						/>
+					{/* Размер шрифта */}
+					<RadioGroup
+						title='Размер шрифта'
+						name='fontSize'
+						selected={formState.fontSizeOption}
+						options={fontSizeOptions}
+						onChange={handleChange('fontSizeOption')}
+					/>
 
-						{/* Цвет шрифта */}
-						<Select
-							title='Цвет шрифта'
-							selected={formState.fontColor}
-							options={fontColors}
-							onChange={(option) =>
-								setFormState({ ...formState, fontColor: option })
-							}
-						/>
-						<Separator />
-						{/* Цвет фона */}
-						<Select
-							title='Цвет фона'
-							selected={formState.backgroundColor}
-							options={backgroundColors}
-							onChange={(option) =>
-								setFormState({ ...formState, backgroundColor: option })
-							}
-						/>
+					{/* Цвет шрифта */}
+					<Select
+						title='Цвет шрифта'
+						selected={formState.fontColor}
+						options={fontColors}
+						onChange={handleChange('fontColor')}
+					/>
+					<Separator />
+					{/* Цвет фона */}
+					<Select
+						title='Цвет фона'
+						selected={formState.backgroundColor}
+						options={backgroundColors}
+						onChange={handleChange('backgroundColor')}
+					/>
 
-						{/* Ширина контента */}
-						<Select
-							title='Ширина контента'
-							selected={formState.contentWidth}
-							options={contentWidthArr}
-							onChange={(option) =>
-								setFormState({ ...formState, contentWidth: option })
-							}
-						/>
+					{/* Ширина контента */}
+					<Select
+						title='Ширина контента'
+						selected={formState.contentWidth}
+						options={contentWidthArr}
+						onChange={handleChange('contentWidth')}
+					/>
 
-						<div className={styles.bottomContainer}>
-							<Button title='Сбросить' htmlType='reset' type='clear' />
-							<Button title='Применить' htmlType='submit' type='apply' />
-						</div>
-					</form>
-				</aside>
-			)}
+					<div className={styles.bottomContainer}>
+						<Button title='Сбросить' htmlType='reset' type='clear' />
+						<Button title='Применить' htmlType='submit' type='apply' />
+					</div>
+				</form>
+			</aside>
 		</>
 	);
 };
